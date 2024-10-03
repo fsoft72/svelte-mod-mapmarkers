@@ -1,13 +1,12 @@
 <script lang="ts">
-    import mapmarkers_store from '../store.svelte';
+    import storeMapmarker from '../store.svelte';
     import FormCreator, { type FormField } from '$liwe3/components/FormCreator.svelte';
     import GoogleMapMarkers from './GoogleMapMarkers.svelte';
     import DataGrid, { type DataGridRow, type DataGridAction, type DataGridField } from '$liwe3/components/DataGrid.svelte';
     import Modal from '$liwe3/components/Modal.svelte';
     import { PencilSquare, Trash } from 'svelte-hero-icons';
 	import { onMount } from 'svelte';
-    import type { Marker, MarkerPosition } from '../types';
-	import type { GridDataRow } from '$liwe3/components/DataGrid1.svelte';
+    import type { Marker } from '../types';
 
     /* FormCreator */
     let formFields: FormField[] = [
@@ -26,8 +25,14 @@
         {
             name: 'gAddress',
             label: 'Address',
-            type: 'Address',
+            type: 'address',
             required: true,
+        },
+        {
+            name: 'enabled',
+            label: 'Enabled',
+            type: 'checkbox',
+            required: false,
         },
     ];
 
@@ -45,10 +50,15 @@
             hidden: true
         },
         {
-            name: 'Address',
+            name: 'address',
             label: 'Address',
             type: 'text'
         },
+        {
+            name: 'enabled',
+            label: 'Enabled',
+            type: 'checkbox',
+        }
     ];
 
     const dataGridActions: DataGridAction[] = [
@@ -102,41 +112,48 @@
             address: pos.formatted,
             phone: pos.telephone,
             position: pos.position,
-            full_address: data.gAddress
+            full_address: data.gAddress,
+            enabled: data.enabled || false
         };
         return marker;
     };
 
     const rowToFields = (data: DataGridRow) => {
-        const marker = mapmarkers_store.get(data.id);
+        const marker = storeMapmarker.get(data.id);
         if (!marker) return {};
         const g = marker.full_address ? marker.full_address: [];
         const fields: Record<string, any> = {
             id: marker.id,
             title: marker.title,
             description: marker.description,
-            gAddress: g
+            gAddress: g,
+            enabled: marker.enabled
         };
         return fields;
     };
 
     const saveMarker = async (data: Record<string, any>) => {
         const marker = fieldsToMarker(data);
-        if (data.id) {
-            await mapmarkers_store.edit(marker);
-        } else {
-            await mapmarkers_store.add(marker);
+        try {
+            if (data.id) {
+                await storeMapmarker.edit(marker);
+            } else {
+                await storeMapmarker.add(marker);
+            }
+        } catch (e) {
+            console.error(e);
         }
-        markers = mapmarkers_store.list();
+        fields = {...{}};
+        markers = storeMapmarker.list();
     };
 
-    const deleteMarker = async (row: GridDataRow) => {
-        await mapmarkers_store.delete(row.id);
-        markers = mapmarkers_store.list();
+    const deleteMarker = async (row: DataGridRow) => {
+        await storeMapmarker.delete(row.id);
+        markers = storeMapmarker.list();
     };
 
     const loadMarkers = async () => {
-        markers = await mapmarkers_store.load();
+        markers = await storeMapmarker.loadAdmin();
         loaded = true;
         return markers;
     };
@@ -148,23 +165,19 @@
 
 <div class="marker-container">
     <div class="marker-left">
-        <div class="full-height">
-            {#key markers}
-                <GoogleMapMarkers markers={markers} center={lastMarker} />
-            {/key}
-        </div>
+        {#key markers}
+            <GoogleMapMarkers markers={markers} center={lastMarker} />
+        {/key}
     </div>
     <div class="marker-right">
-        <div class="full-height">
-            {#key markers}
-                <DataGrid
-                    data={markers}
-                    fields={dataGridFields}
-                    actions={dataGridActions}
-                    buttons = {dataGridButtons}
-                />
-            {/key}
-        </div>
+        {#key markers}
+            <DataGrid
+                data={markers}
+                fields={dataGridFields}
+                actions={dataGridActions}
+                buttons = {dataGridButtons}
+            />
+        {/key}
     </div>
     {#if modal}
         <Modal
@@ -190,12 +203,11 @@
         display: flex;
         flex-direction: row;
         justify-content: center;
-        align-items: center;
+        align-items: start;
         gap: 0.5rem;
         width: 100%;
-        height: calc(100% - 4rem);
-        min-width: 100%;
-        min-height: calc(100% - 4rem);
+        height: 100%;
+        max-height: calc(100% - 4rem);
         margin-top: 0.5rem;
     }
     .marker-left {
@@ -206,26 +218,16 @@
         justify-content: center;
         align-items: center;
         width: 40%;
-        height: 100%;
+        height: 100vh;
     }
     .marker-right {
         position: relative;
         flex: .6 1 0;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
         width: 60%;
         height: 100%;
-    }
-    .full-height {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left:0;
-        width: 100%;
-        min-width: 100%;
-        height: 100%;
-        min-height: 100%;
     }
 </style>

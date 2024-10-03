@@ -53,14 +53,16 @@ export const mapmarkers_admin_del = async ( id: string, _options?: LiWEFetcherOp
  * @param description -  [opt]
  * @param address -  [opt]
  * @param phone -  [opt]
+ * @param enabled -  [opt]
  *
  * @return marker: Marker
  *
  */
-export const mapmarkers_admin_edit = async ( id: string, title?: string, position?: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, _options?: LiWEFetcherOptions ) => {
+export const mapmarkers_admin_edit = async ( id: string, title?: string, position?: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, enabled?: boolean, _options?: LiWEFetcherOptions ) => {
 	const res = await patch( `/api/mapmarkers/admin/edit`, { 
 		address,
 		description,
+		enabled,
 		full_address,
 		id,
 		phone,
@@ -101,14 +103,16 @@ export const mapmarkers_list = async ( _options?: any ) => {
  * @param description - Marker description [opt]
  * @param address - Marker address [opt]
  * @param phone - Marker phone [opt]
+ * @param enabled -  [opt]
  *
  * @return marker: Marker
  *
  */
-export const mapmarkers_admin_add = async ( title: string, position: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, _options?: LiWEFetcherOptions ) => {
+export const mapmarkers_admin_add = async ( title: string, position: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, enabled?: boolean, _options?: LiWEFetcherOptions ) => {
 	const res = await post( `/api/mapmarkers/admin/add`, { 
 		address,
 		description,
+		enabled,
 		full_address,
 		phone,
 		position,
@@ -120,6 +124,23 @@ export const mapmarkers_admin_add = async ( title: string, position: any, full_a
 	/*=== f2c_start mapmarkers_admin_add ===*/
 
 	/*=== f2c_end mapmarkers_admin_add ===*/
+
+	return res.marker;
+};
+
+/**
+ *
+ * @return marker: Marker
+ *
+ */
+export const mapmarkers_admin_list = async ( _options?: any ) => {
+	const res = await get( `/api/mapmarkers/admin/list`, {}, _options?.skipError ? _options.skipError : false );
+
+	if (res.error) return res;
+
+	/*=== f2c_start mapmarkers_admin_list ===*/
+
+	/*=== f2c_end mapmarkers_admin_list ===*/
 
 	return res.marker;
 };

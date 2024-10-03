@@ -2,10 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*=== f2c_start __file ===*/
-export interface MarkerInterface extends Marker {
-	position: MarkerPosition;
-	full_address: MarkerGoogleAddress[] | undefined;
-}
 /*=== f2c_end __file ===*/
 
 /** MarkerRecord */
@@ -24,6 +20,8 @@ export interface MarkerRecord {
 	address?: string;
 	/**  */
 	phone?: string;
+	/**  */
+	enabled?: boolean;
 }
 
 /** Marker */
@@ -42,6 +40,8 @@ export interface Marker {
 	address?: string;
 	/** Marker phone */
 	phone?: string;
+	/**  */
+	enabled?: boolean;
 }
 
 /** MarkerPosition */

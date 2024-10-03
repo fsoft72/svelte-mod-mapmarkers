@@ -3,6 +3,7 @@ import {
 	mapmarkers_admin_edit,
 	mapmarkers_admin_del,
 	mapmarkers_list,
+	mapmarkers_admin_list,
 } from './actions';
 import type { Marker } from './types';
 
@@ -12,11 +13,12 @@ interface MapMarkerStore {
 	edit: ( data: Marker ) => Promise<Marker | undefined>;
 	get: ( id: string ) => Marker | undefined;
 	delete: ( id: string ) => Promise<void>;
+	loadAdmin: () => Promise<Marker[]>;
 	load: () => Promise<Marker[]>;
 	list: () => Marker[];
 };
 
-const mapmarker_store: MapMarkerStore = $state( {
+const storeMapmarker: MapMarkerStore = $state( {
 	markers: [],
 	add: async ( data: Marker ) => {
 		if ( !data.title || !data.position || !data.full_address ) {
@@ -24,12 +26,12 @@ const mapmarker_store: MapMarkerStore = $state( {
 			return;
 		}
 
-		const res = await mapmarkers_admin_add( data.title, data.position, data.full_address, data.description, data.address, data.phone );
+		const res = await mapmarkers_admin_add( data.title, data.position, data.full_address, data.description, data.address, data.phone, data.enabled );
 		if ( res.error ) return;
 
-		mapmarker_store.markers.push( res );
+		storeMapmarker.markers.push( res );
 
-		return mapmarker_store.get( res.id );
+		return storeMapmarker.get( res.id );
 	},
 	edit: async ( data: Marker ) => {
 		if ( !data.id || !data.title || !data.position ) {
@@ -37,17 +39,18 @@ const mapmarker_store: MapMarkerStore = $state( {
 			return;
 		}
 
-		const res = await mapmarkers_admin_edit( data.id, data.title, data.position, data.full_address, data.description, data.address, data.phone );
+		const res = await mapmarkers_admin_edit( data.id, data.title, data.position, data.full_address, data.description, data.address, data.phone, data.enabled );
+
 		if ( res.error ) return;
 
-		const idx = mapmarker_store.markers.findIndex( ( m: Marker ) => m.id === res.id );
+		const idx = storeMapmarker.markers.findIndex( ( m: Marker ) => m.id === res.id );
 
-		mapmarker_store.markers[ idx ] = res;
+		storeMapmarker.markers[ idx ] = res;
 
-		return mapmarker_store.get( res.id );
+		return storeMapmarker.get( res.id );
 	},
 	get: ( id: string ) => {
-		const marker: Marker | undefined = mapmarker_store.markers.find( ( marker: Marker ) => marker.id === id );
+		const marker: Marker | undefined = storeMapmarker.markers.find( ( marker: Marker ) => marker.id === id );
 		return marker;
 	},
 	delete: async ( id: string ) => {
@@ -57,8 +60,18 @@ const mapmarker_store: MapMarkerStore = $state( {
 			return;
 		}
 
-		const idx = mapmarker_store.markers.findIndex( ( marker: Marker ) => marker.id === id );
-		delete mapmarker_store.markers[ idx ];
+		const idx = storeMapmarker.markers.findIndex( ( marker: Marker ) => marker.id === id );
+		delete storeMapmarker.markers[ idx ];
+	},
+	loadAdmin: async () => {
+		const res = await mapmarkers_admin_list();
+		if ( res.error ) {
+			console.error( 'Error loading markers:', res.error );
+			return [];
+		}
+
+		storeMapmarker.markers = res;
+		return storeMapmarker.list();
 	},
 	load: async () => {
 		const res = await mapmarkers_list();
@@ -67,10 +80,10 @@ const mapmarker_store: MapMarkerStore = $state( {
 			return [];
 		}
 
-		mapmarker_store.markers = res;
-		return mapmarker_store.list();
+		storeMapmarker.markers = res;
+		return storeMapmarker.list();
 	},
-	list: () => Object.values( mapmarker_store.markers )
+	list: () => Object.values( storeMapmarker.markers )
 } );
 
-export default mapmarker_store;
+export default storeMapmarker;

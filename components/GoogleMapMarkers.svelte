@@ -68,9 +68,7 @@
 
         if (createMarker) return createMarker(marker);
 
-        console.log('marker:', marker);
-
-        // FIXME: exclude fields: creayed, updxated and domain should be filtered out in the backend
+        // most of theese fields are already filtered out in the backend
         const exclude = ['position', 'id', 'full_address', 'created', 'updated', 'domain'];
         const content = document.createElement('div');
         content.classList.add('liwe3-GMmarkers');
