@@ -29,6 +29,18 @@
             required: true,
         },
         {
+            name: 'email',
+            label: 'Email',
+            type: 'email',
+            required: false,
+        },
+        {
+            name: 'website',
+            label: 'Website',
+            type: 'text',
+            required: false,
+        },
+        {
             name: 'enabled',
             label: 'Enabled',
             type: 'checkbox',
@@ -113,8 +125,11 @@
             phone: pos.telephone,
             position: pos.position,
             full_address: data.gAddress,
+            email: data.email,
+            website: data.website,
             enabled: data.enabled || false
         };
+        console.log('fieldsToMarker', data, marker);
         return marker;
     };
 
@@ -127,12 +142,15 @@
             title: marker.title,
             description: marker.description,
             gAddress: g,
+            email: marker.email,
+            website: marker.website,
             enabled: marker.enabled
         };
         return fields;
     };
 
     const saveMarker = async (data: Record<string, any>) => {
+        console.log( 'saveMarker', data);
         const marker = fieldsToMarker(data);
         try {
             if (data.id) {
@@ -163,39 +181,37 @@
     });
 </script>
 
+{#if loaded}
 <div class="marker-container">
     <div class="marker-left">
-        {#key markers}
-            <GoogleMapMarkers markers={markers} center={lastMarker} />
-        {/key}
+        <GoogleMapMarkers markers={markers} center={lastMarker} />
     </div>
     <div class="marker-right">
-        {#key markers}
-            <DataGrid
-                data={markers}
-                fields={dataGridFields}
-                actions={dataGridActions}
-                buttons = {dataGridButtons}
-            />
-        {/key}
+        <DataGrid
+            data={markers}
+            fields={dataGridFields}
+            actions={dataGridActions}
+            buttons = {dataGridButtons}
+        />
     </div>
-    {#if modal}
-        <Modal
-            title={formTitle}
-            size="sm"
-            closeOnEsc={false}
-            closeOnOutsideClick={false}
-            onclose={() => modal = false}
-            oncancel={() => modal = false}
-        >
-            <FormCreator
-                fields={formFields}
-                values={$state.snapshot(fields)}
-                onsubmit={(formValues) => { saveMarker(formValues);}}
-            />
-    </Modal>
-    {/if}
 </div>
+{/if}
+{#if modal}
+    <Modal
+        title={formTitle}
+        size="sm"
+        closeOnEsc={false}
+        closeOnOutsideClick={false}
+        onclose={() => modal = false}
+        oncancel={() => modal = false}
+    >
+        <FormCreator
+            fields={formFields}
+            values={$state.snapshot(fields)}
+            onsubmit={(formValues) => { saveMarker(formValues);}}
+        />
+    </Modal>
+{/if}
 <style>
     .marker-container {
         position: relative;

@@ -22,11 +22,11 @@ const storeMapmarker: MapMarkerStore = $state( {
 	markers: [],
 	add: async ( data: Marker ) => {
 		if ( !data.title || !data.position || !data.full_address ) {
-			console.warn( 'D, title or position missing. Abort adding marker.' );
+			console.warn( 'ADD, title or position missing. Abort adding marker.' );
 			return;
 		}
 
-		const res = await mapmarkers_admin_add( data.title, data.position, data.full_address, data.description, data.address, data.phone, data.enabled );
+		const res = await mapmarkers_admin_add( data.title, data.position, data.full_address, data.description, data.address, data.phone, data.email, data.website, data.enabled );
 		if ( res.error ) return;
 
 		storeMapmarker.markers.push( res );
@@ -35,11 +35,11 @@ const storeMapmarker: MapMarkerStore = $state( {
 	},
 	edit: async ( data: Marker ) => {
 		if ( !data.id || !data.title || !data.position ) {
-			console.warn( 'D, title or position missing. Abort editing marker.' );
+			console.warn( 'EDIT, title or position missing. Abort editing marker.' );
 			return;
 		}
 
-		const res = await mapmarkers_admin_edit( data.id, data.title, data.position, data.full_address, data.description, data.address, data.phone, data.enabled );
+		const res = await mapmarkers_admin_edit( data.id, data.title, data.position, data.full_address, data.description, data.address, data.phone, data.email, data.website, data.enabled );
 
 		if ( res.error ) return;
 
@@ -50,6 +50,7 @@ const storeMapmarker: MapMarkerStore = $state( {
 		return storeMapmarker.get( res.id );
 	},
 	get: ( id: string ) => {
+		console.log( 'storeMapmarker.get', storeMapmarker.markers );
 		const marker: Marker | undefined = storeMapmarker.markers.find( ( marker: Marker ) => marker.id === id );
 		return marker;
 	},

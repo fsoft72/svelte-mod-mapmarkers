@@ -53,21 +53,25 @@ export const mapmarkers_admin_del = async ( id: string, _options?: LiWEFetcherOp
  * @param description -  [opt]
  * @param address -  [opt]
  * @param phone -  [opt]
+ * @param email - Marker email [opt]
+ * @param website - Marker website url [opt]
  * @param enabled -  [opt]
  *
  * @return marker: Marker
  *
  */
-export const mapmarkers_admin_edit = async ( id: string, title?: string, position?: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, enabled?: boolean, _options?: LiWEFetcherOptions ) => {
+export const mapmarkers_admin_edit = async ( id: string, title?: string, position?: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, email?: string, website?: string, enabled?: boolean, _options?: LiWEFetcherOptions ) => {
 	const res = await patch( `/api/mapmarkers/admin/edit`, { 
 		address,
 		description,
+		email,
 		enabled,
 		full_address,
 		id,
 		phone,
 		position,
-		title
+		title,
+		website
 	 }, _options?.skipError ? _options.skipError : false );
 
 	if (res.error) return res;
@@ -103,20 +107,24 @@ export const mapmarkers_list = async ( _options?: any ) => {
  * @param description - Marker description [opt]
  * @param address - Marker address [opt]
  * @param phone - Marker phone [opt]
+ * @param email - Marker email [opt]
+ * @param website - Marker website [opt]
  * @param enabled -  [opt]
  *
  * @return marker: Marker
  *
  */
-export const mapmarkers_admin_add = async ( title: string, position: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, enabled?: boolean, _options?: LiWEFetcherOptions ) => {
+export const mapmarkers_admin_add = async ( title: string, position: any, full_address?: MarkerGoogleAddress[], description?: string, address?: string, phone?: string, email?: string, website?: string, enabled?: boolean, _options?: LiWEFetcherOptions ) => {
 	const res = await post( `/api/mapmarkers/admin/add`, { 
 		address,
 		description,
+		email,
 		enabled,
 		full_address,
 		phone,
 		position,
-		title
+		title,
+		website
 	 }, _options?.skipError ? _options.skipError : false );
 
 	if (res.error) return res;

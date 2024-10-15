@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*=== f2c_start __file ===*/
+
 /*=== f2c_end __file ===*/
 
 /** MarkerRecord */
@@ -20,6 +21,10 @@ export interface MarkerRecord {
 	address?: string;
 	/**  */
 	phone?: string;
+	/** Marker email */
+	email?: string;
+	/** Marker website url */
+	website?: string;
 	/**  */
 	enabled?: boolean;
 }
@@ -40,6 +45,10 @@ export interface Marker {
 	address?: string;
 	/** Marker phone */
 	phone?: string;
+	/** Marker email */
+	email?: string;
+	/** Marker website url */
+	website?: string;
 	/**  */
 	enabled?: boolean;
 }

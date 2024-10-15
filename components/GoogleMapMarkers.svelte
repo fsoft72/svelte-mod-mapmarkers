@@ -23,7 +23,7 @@
 
     let {
         markers,
-        center = { lat: 45.450001, lng: 8.616667 },
+        center = $bindable({ lat: 45.450001, lng: 8.616667 }),
         zoom = 12,
         createMarker,
         onclick,
@@ -64,6 +64,11 @@
         });
     };
 
+    const centerMap = (center: { lat: number, lng: number}) => {
+        if(!map) return;
+        map.setCenter(center);
+    };
+
     const createContent = (marker: Marker) => {
 
         if (createMarker) return createMarker(marker);
@@ -73,6 +78,7 @@
         const content = document.createElement('div');
         content.classList.add('liwe3-GMmarkers');
         let innerContent = `
+        <div class="liwe3-GMmarkers-cnt">
             <div class="liwe3-GMmarkers-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="24px" height="24px">
                     <path d="M12 2C7.03 2 3 6.03 3 11c0 5.25 9 13 9 13s9-7.75 9-13c0-4.97-4.03-9-9-9zm0 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
@@ -80,20 +86,17 @@
                 </svg>
             </div>
             <div class="liwe3-GMmarkers-details">
-                <div class="liwe3-GMmarkers-title">${(marker.title as string)}</div>
-            `;
-
-        Object.keys(marker).forEach(key => {
-            if ( exclude.includes(key)) return;
-            if ( key === 'description') {
-                innerContent += marked.parse(marker[key]!, { gfm: true });
-                return;
-            }
-            // @ts-ignore
-            innerContent += `<p>${marker[key]}</p>`;
-        });
-
-        innerContent += `</div>`;
+                <div class="liwe3-GMmarkers-title">${marker.title}</div>
+                <div class="liwe3-GMmarkers-description">${marked.parse(marker.description!, { gfm: true })}</div>
+                <div class="liwe3-GMmarkers-address">
+                    <p>${marker.address}</p>
+                    <p><a href="tel:${marker.phone}">${marker.phone}</a></p>
+                    <p><a href="mailto:${marker.email}">${marker.email}</a></p>
+                    <p><a href="https://${marker.website}" target="_blank">${marker.website}</a></p>
+                </div>
+            </div>
+        </div>
+        `;
         content.innerHTML = innerContent;
 
         return content;
@@ -102,13 +105,17 @@
     const toggleMarker = (markerContent: any, data: Marker) => {
         if(!markerContent.details)
             markerContent.details = markerContent.content.querySelector('.liwe3-GMmarkers-details');
+        if(!markerContent.cnt)
+            markerContent.cnt = markerContent.content.querySelector('.liwe3-GMmarkers-cnt');
         if (markerContent.classList.contains('marker-active')) {
             markerContent.classList.remove('marker-active');
+            markerContent.cnt.classList.remove('marker-active');
             markerContent.zIndex = null;
             markerContent.details.style.display = 'none';
             return;
         }
         markerContent.classList.add('marker-active');
+        markerContent.cnt.classList.add('marker-active');
         markerContent.zIndex = 1;
         markerContent.details.style.display = 'block';
     };
@@ -128,6 +135,10 @@
             }) );
         });
     }
+
+    $effect(() => {
+        centerMap(center);
+    });
 
     onMount( async () => {
         libs = await loadGoogleMapsCore();
