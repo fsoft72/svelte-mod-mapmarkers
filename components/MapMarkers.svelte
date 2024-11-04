@@ -8,6 +8,12 @@
 	import { onMount } from 'svelte';
     import type { Marker } from '../types';
 
+    type Props = {
+        mapId?: string;
+    };
+
+    let { mapId }: Props = $props();
+
     /* FormCreator */
     let formFields: FormField[] = [
         {
@@ -129,7 +135,7 @@
             website: data.website,
             enabled: data.enabled || false
         };
-        console.log('fieldsToMarker', data, marker);
+        //console.log('fieldsToMarker', data, marker);
         return marker;
     };
 
@@ -150,7 +156,7 @@
     };
 
     const saveMarker = async (data: Record<string, any>) => {
-        console.log( 'saveMarker', data);
+        //console.log( 'saveMarker', data);
         const marker = fieldsToMarker(data);
         try {
             if (data.id) {
@@ -184,7 +190,7 @@
 {#if loaded}
 <div class="marker-container">
     <div class="marker-left">
-        <GoogleMapMarkers markers={markers} center={lastMarker} />
+        <GoogleMapMarkers markers={markers} center={lastMarker} {mapId} />
     </div>
     <div class="marker-right">
         <DataGrid
@@ -214,36 +220,27 @@
 {/if}
 <style>
     .marker-container {
-        position: relative;
-        flex: 1;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: start;
-        gap: 0.5rem;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        grid-template-rows: 100%;
+        gap: .5rem;
         width: 100%;
-        height: 100%;
-        max-height: calc(100% - 4rem);
-        margin-top: 0.5rem;
+        height: 85vh;
     }
     .marker-left {
-        position: relative;
-        flex: .4 1 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        width: 40%;
-        height: 100vh;
+        min-width: 100%;
+        height: 100%;
     }
     .marker-right {
-        position: relative;
-        flex: .6 1 0;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        align-items: center;
-        width: 60%;
+        align-items: start;
+        min-width: 100%;
         height: 100%;
     }
 </style>

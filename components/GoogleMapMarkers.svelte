@@ -15,6 +15,8 @@
         markers: Marker[];
         center?: { lat: number, lng: number};
         zoom?: number;
+        // Google Map ID defined in Google console
+        mapId?: string;
         // pass custom method to create HTML marker
         createMarker?: (marker: Marker) => HTMLElement;
         // events
@@ -25,6 +27,7 @@
         markers,
         center = $bindable({ lat: 45.450001, lng: 8.616667 }),
         zoom = 12,
+        mapId = mkid('map'),
         createMarker,
         onclick,
     }: Props = $props();
@@ -37,7 +40,7 @@
     let AdvancedMarkerElement: any;
     let google: WindowType['google'];
 
-    const API_URL = `https://maps.googleapis.com/maps/api/js?key=${PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=maps`;
+    const API_URL = `https://maps.googleapis.com/maps/api/js?key=${PUBLIC_GOOGLE_MAPS_API_KEY}`;
 
     const loadGoogleMapsCore = async () => {
         // @ts-ignore
@@ -60,7 +63,7 @@
         map = new Map(mapContainer, {
             center,
             zoom,
-            mapId: mkid('map')
+            mapId
         });
     };
 
