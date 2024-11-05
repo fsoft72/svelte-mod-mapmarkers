@@ -34,6 +34,8 @@
 
     let libs: any = $state(null);
     let init: any = $state(null);
+
+    let mapDiv: HTMLDivElement;
     let win = window as WindowType;
     let map: any;
     let evts: any = [];
@@ -58,9 +60,7 @@
         const { Map } = await google.maps.importLibrary("maps");
         AdvancedMarkerElement = await google.maps.importLibrary("marker");
 
-        const mapContainer = document.getElementById('map') as HTMLDivElement;
-
-        map = new Map(mapContainer, {
+        map = new Map(mapDiv, {
             center,
             zoom,
             mapId
@@ -154,7 +154,7 @@
         evts.map((evt:any) => evt.remove());
     });
 </script>
-<div id="map" class="target-div"></div>
+<div bind:this={mapDiv} class="target-div"></div>
 
 <style>
     .target-div {
