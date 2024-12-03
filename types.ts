@@ -51,6 +51,8 @@ export interface Marker {
 	website?: string;
 	/**  */
 	enabled?: boolean;
+	/** additional data */
+	extra?: any;
 }
 
 /** MarkerPosition */
