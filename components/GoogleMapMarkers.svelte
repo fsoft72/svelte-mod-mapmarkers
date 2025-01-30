@@ -1,17 +1,6 @@
-<script lang="ts">
-    import { PUBLIC_GOOGLE_MAPS_API_KEY } from '$env/static/public';
-	import { mkid } from '$liwe3/utils/utils';
-    import { onMount, onDestroy } from 'svelte';
+<script module lang="ts">
     import type { Marker } from '../types';
-	import { marked } from 'marked';
-
-    type WindowType = typeof window & {
-        google: {
-            maps: any;
-        }
-    };
-
-    type Props = {
+    export interface GoogleMapMarkerProps {
         markers: Marker[];
         center?: { lat: number, lng: number};
         zoom?: number;
@@ -21,7 +10,17 @@
         createMarker?: (marker: Marker) => HTMLElement;
         // events
         onclick?: (AdvancedMarkerElement:any , marker: Marker) => void;
+        onrendered?: (map: any) => void;
+        ondrag?: (center: google.maps.LatLngLiteral) => void;
     };
+
+</script>
+<script lang="ts">
+    import { PUBLIC_GOOGLE_MAPS_API_KEY } from '$env/static/public';
+	import { mkid } from '$liwe3/utils/utils';
+    import { onMount, onDestroy } from 'svelte';
+	import { marked } from 'marked';
+	import { runeDebug } from '$liwe3/utils/runes.svelte';
 
     let {
         markers,
@@ -30,19 +29,17 @@
         mapId = mkid('map'),
         createMarker,
         onclick,
-    }: Props = $props();
+        onrendered,
+        ondrag
+    }: GoogleMapMarkerProps = $props();
 
     let libs: any = $state(null);
     let init: any = $state(null);
 
     let mapDiv: HTMLDivElement;
-    let win = window as WindowType;
-    let map: any;
+    let map: google.maps.Map | null = null;
     let evts: any = [];
     let AdvancedMarkerElement: any;
-    let google: WindowType['google'];
-
-    const API_URL = `https://maps.googleapis.com/maps/api/js?key=${PUBLIC_GOOGLE_MAPS_API_KEY}`;
 
     const loadGoogleMapsCore = async () => {
         // @ts-ignore
@@ -55,21 +52,35 @@
     };
 
     const initMap = async () => {
-        google = win.google;
 
-        const { Map } = await google.maps.importLibrary("maps");
+        await google.maps.importLibrary("maps");
         AdvancedMarkerElement = await google.maps.importLibrary("marker");
 
-        map = new Map(mapDiv, {
+        map = new google.maps.Map(mapDiv, {
             center,
             zoom,
             mapId
         });
+
+        // Add drag listener
+        if( map && ondrag ){
+            const dragListener = map.addListener('dragend', () => {
+                //@ts-ignore - map is verified not null
+                const newCenter = map.getCenter()?.toJSON();
+                if (newCenter && ondrag) {
+                    ondrag(newCenter);
+                }
+            });
+            evts.push(dragListener);
+        }
+
+        onrendered && onrendered(map);
     };
 
     const centerMap = (center: { lat: number, lng: number}) => {
         if(!map) return;
         map.setCenter(center);
+        ondrag && ondrag(center);
     };
 
     const createContent = (marker: Marker) => {
@@ -125,9 +136,16 @@
 
     const buildMarkers = () => {
         markers.forEach((marker: Marker) => {
+            const position = {
+                lat: Number(marker.position.lat),
+                lng: Number(marker.position.lng),
+            };
+
+            //console.log('Creating marker at:', position);
+
             const advancedMarkerElement = new google.maps.marker.AdvancedMarkerElement({
                 map,
-                position: marker.position,
+                position,
                 title: marker.title,
                 content: createContent(marker),
             });
@@ -146,7 +164,9 @@
     onMount( async () => {
         libs = await loadGoogleMapsCore();
         init = await initMap();
-        buildMarkers();
+
+       buildMarkers();
+       //buildInfowindows();
     });
 
     onDestroy(() => {
