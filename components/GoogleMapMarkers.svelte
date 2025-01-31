@@ -66,7 +66,7 @@
         if( map && ondrag ){
             const dragListener = map.addListener('dragend', () => {
                 //@ts-ignore - map is verified not null
-                const newCenter = map.getCenter()?.toJSON();
+                const newCenter = map.center.toJSON();
                 if (newCenter && ondrag) {
                     ondrag(newCenter);
                 }
@@ -80,7 +80,7 @@
     const centerMap = (center: { lat: number, lng: number}) => {
         if(!map) return;
         map.setCenter(center);
-        ondrag && ondrag(center);
+        //ondrag && ondrag(center);
     };
 
     const createContent = (marker: Marker) => {
@@ -159,6 +159,13 @@
 
     $effect(() => {
         centerMap(center);
+    });
+
+    $effect ( () => {
+        markers;
+        if (map && markers.length > 0) {
+            buildMarkers();
+        }
     });
 
     onMount( async () => {
