@@ -11,7 +11,8 @@
         // events
         onclick?: (AdvancedMarkerElement:any , marker: Marker) => void;
         onrendered?: (map: any) => void;
-        ondrag?: (center: google.maps.LatLngLiteral) => void;
+        ondrag?: (center: google.maps.LatLngLiteral, zoom: number, range: number) => void;
+        onzoom?: (center: google.maps.LatLngLiteral, zoom: number, range: number) => void;
     };
 
 </script>
@@ -30,7 +31,8 @@
         createMarker,
         onclick,
         onrendered,
-        ondrag
+        ondrag,
+        onzoom
     }: GoogleMapMarkerProps = $props();
 
     let libs: any = $state(null);
@@ -40,6 +42,7 @@
     let map: google.maps.Map | null = null;
     let evts: any = [];
     let AdvancedMarkerElement: any;
+    let range = $derived.by(() => calculateRange(zoom)); // Derived state for range
 
     const loadGoogleMapsCore = async () => {
         // @ts-ignore
@@ -49,6 +52,22 @@
             // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
             // Add other bootstrap parameters as needed, using camel case.
         });
+    };
+
+    const calculateRange = (zoom: number) => {
+        // Define a function to convert zoom levels into search radius
+        const zoomToRadius:{[key: number]: number} = {
+            20: 0.1, // 100 meters
+            18: 0.5, // 500 meters
+            16: 1,   // 1 km
+            14: 5,   // 5 km
+            12: 10,  // 10 km
+            10: 20,  // 20 km
+            8: 50,   // 50 km
+            6: 100,  // 100 km
+            4: 200   // 200 km
+        };
+        return zoomToRadius[zoom] || 10; // Default to 10 km if undefined
     };
 
     const initMap = async () => {
@@ -63,15 +82,29 @@
         });
 
         // Add drag listener
-        if( map && ondrag ){
-            const dragListener = map.addListener('dragend', () => {
-                //@ts-ignore - map is verified not null
-                const newCenter = map.center.toJSON();
-                if (newCenter && ondrag) {
-                    ondrag(newCenter);
-                }
-            });
-            evts.push(dragListener);
+        if (map) {
+            if (ondrag){
+                const dragListener = map.addListener('dragend', () => {
+                    //@ts-ignore - map is verified not null
+                    const newCenter = map.center.toJSON();
+                    if (newCenter && ondrag) {
+                        ondrag(newCenter, zoom, range);
+                    }
+                });
+                evts.push(dragListener);
+            }
+
+            if (onzoom){
+                const zoomLIstemner = map.addListener('zoom_changed', () => {
+                    //@ts-ignore - map is verified not null
+                    const newZoom = map.getZoom();
+                    if (newZoom) {
+                        zoom = newZoom;
+                        onzoom(center, zoom, range);
+                    }
+                });
+                evts.push(zoomLIstemner);
+            }
         }
 
         onrendered && onrendered(map);
