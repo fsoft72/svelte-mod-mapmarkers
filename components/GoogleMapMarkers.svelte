@@ -152,6 +152,8 @@
     const toggleMarker = (markerContent: any, data: Marker) => {
         if(!markerContent.details)
             markerContent.details = markerContent.content.querySelector('.liwe3-GMmarkers-details');
+            if(!markerContent.details)
+                return;
         if(!markerContent.cnt)
             markerContent.cnt = markerContent.content.querySelector('.liwe3-GMmarkers-cnt');
         if (markerContent.classList.contains('marker-active')) {
