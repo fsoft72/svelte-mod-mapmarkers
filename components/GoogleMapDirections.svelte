@@ -4,6 +4,7 @@
     import type { Marker } from '$modules/mapmarkers/types';
     import type { GoogleMapMarkerProps } from './GoogleMapMarkers.svelte';
 	import { runeDebug } from '$liwe3/utils/runes.svelte';
+	import { addToast } from '$liwe3/stores/ToastStore.svelte';
 
     interface PropsType extends GoogleMapMarkerProps {
         mode?: 'DRIVING' | 'WALKING' | 'BICYCLING' | 'TRANSIT';
@@ -67,7 +68,12 @@
             onresponse && onresponse(result);
         } catch (error) {
             console.error('Error calculating route:', error);
-            alert('Could not calculate the route. Please try again.');
+            addToast({
+                title: 'Error',
+                message: 'Could not calculate the route. Please try again.',
+                type: 'error'
+            });
+            console.warn( 'Could not calculate the route. Please try again.', 'error');
         }
     };
 
