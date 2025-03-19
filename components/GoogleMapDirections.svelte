@@ -1,17 +1,18 @@
 <script lang="ts">
     import GoogleMapMarkers from './GoogleMapMarkers.svelte';
+	import { addToast } from '$liwe3/stores/ToastStore.svelte';
 
     import type { Marker } from '$modules/mapmarkers/types';
     import type { GoogleMapMarkerProps } from './GoogleMapMarkers.svelte';
 	import { runeDebug } from '$liwe3/utils/runes.svelte';
-	import { addToast } from '$liwe3/stores/ToastStore.svelte';
 
     interface PropsType extends GoogleMapMarkerProps {
+        key?: number;
         mode?: 'DRIVING' | 'WALKING' | 'BICYCLING' | 'TRANSIT';
         onresponse?: (response: any) => void;
     };
 
-    let { markers, mode = $bindable(), mapId, createMarker, onclick, onresponse, ondrag }:PropsType = $props();
+    let { key, markers, mode = $bindable(), mapId, createMarker, onclick, onresponse, ondrag }:PropsType = $props();
 
     let waypoints:any = {
         origin: '',
@@ -19,6 +20,7 @@
     };
 
     let map: google.maps.Map | null = $state(null);
+    let resetMap: boolean = $state(false);
 
     const createWaypoint = () => {
         const filtered = markers.filter((marker: Marker) => marker.position);
@@ -65,6 +67,7 @@
             const result = await directionsService.route( waypoints );
             directionsRenderer.setDirections(result);
             //runeDebug('calculateRoute', result);
+            resetMap = false;
             onresponse && onresponse(result);
         } catch (error) {
             console.error('Error calculating route:', error);
@@ -87,5 +90,12 @@
         map = m;
         showRoute();
     };
+
+    $effect(() => {
+        if(map && mode) {
+            resetMap = true;
+            showRoute();
+        }
+    });
 </script>
-<GoogleMapMarkers {markers} {mapId} {createMarker} {onclick} onrendered={mapRendered} {ondrag} />
+<GoogleMapMarkers {markers} {mapId} {createMarker} reset={resetMap} {onclick} onrendered={mapRendered} {ondrag} />

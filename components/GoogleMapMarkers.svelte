@@ -6,6 +6,7 @@
         zoom?: number;
         // Google Map ID defined in Google console
         mapId?: string;
+        reset?: boolean;
         // pass custom method to create HTML marker
         createMarker?: (marker: Marker) => HTMLElement;
         // events
@@ -28,7 +29,10 @@
         center = $bindable({ lat: 45.450001, lng: 8.616667 }),
         zoom = 12,
         mapId = mkid('map'),
+
+        reset = false,
         createMarker,
+
         onclick,
         onrendered,
         ondrag,
@@ -200,6 +204,15 @@
         markers;
         if (map && markers.length > 0) {
             buildMarkers();
+        }
+    });
+
+    $effect(() => {
+        if (reset) {
+            ( async () => {
+                map = null;
+                await initMap();
+            })();
         }
     });
 
