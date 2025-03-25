@@ -80,22 +80,24 @@
         }
     };
 
-    const showRoute = () => {
+    const showRoute = async () => {
         createWaypoint();
-        calculateRoute();
+        await calculateRoute();
     };
 
-    const mapRendered = (m:google.maps.Map) => {
+    const mapRendered = async (m:google.maps.Map) => {
         if (!m) return;
         map = m;
-        showRoute();
+        await showRoute();
     };
 
     $effect(() => {
-        if(map && mode) {
-            resetMap = true;
-            showRoute();
-        }
+        ( async () => {
+            if(map && mode) {
+                resetMap = true;
+                showRoute();
+            }
+        })();
     });
 </script>
 <GoogleMapMarkers {markers} {mapId} {createMarker} reset={resetMap} {onclick} onrendered={mapRendered} {ondrag} />
