@@ -37,6 +37,8 @@ export interface Marker {
 	title: string;
 	/** Marker position {lat, lng} */
 	position: any;
+	/** Category ID */
+	category?: string;
 	/** Marker full google data */
 	full_address?: any[];
 	/** Marker description */
