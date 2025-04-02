@@ -61,15 +61,15 @@
     const calculateRange = (zoom: number) => {
         // Define a function to convert zoom levels into search radius
         const zoomToRadius:{[key: number]: number} = {
-            20: 0.1, // 100 meters
-            18: 0.5, // 500 meters
-            16: 1,   // 1 km
-            14: 5,   // 5 km
-            12: 10,  // 10 km
-            10: 20,  // 20 km
-            8: 50,   // 50 km
-            6: 100,  // 100 km
-            4: 200   // 200 km
+            20: 0.4,    // 400 meters
+            18: 1.5,    // 1.5 km
+            16: 3.5,    // 3.5 km
+            14: 11,     // 11 km
+            12: 32.5,   // 32.5 km
+            10: 97,     // 97 km
+            8: 291.5,   // 291.5 km
+            6: 535,     // 535 km
+            4: 800      // 800 km
         };
         return zoomToRadius[zoom] || 10; // Default to 10 km if undefined
     };
