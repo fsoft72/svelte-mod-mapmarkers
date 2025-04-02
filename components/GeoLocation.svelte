@@ -18,7 +18,6 @@
 
     const success = (position: GeolocationPosition) => {
         coords = { lat: position.coords.latitude, lng: position.coords.longitude };
-        console.log('Geolocation success:', coords);
     };
 
     const error = (err: GeolocationPositionError) => {
