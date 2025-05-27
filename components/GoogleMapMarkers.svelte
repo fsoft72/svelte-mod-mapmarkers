@@ -189,7 +189,7 @@
                 content: createContent(marker),
             });
 
-            evts.push ( advancedMarkerElement.addListener('click', () => {
+            evts.push ( advancedMarkerElement.addListener('gmp-click', () => {
                 toggleMarker(advancedMarkerElement, marker);
                 onclick && onclick(advancedMarkerElement, marker);
             }) );
