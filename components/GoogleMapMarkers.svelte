@@ -9,6 +9,8 @@
         reset?: boolean;
         // pass custom method to create HTML marker
         createMarker?: (marker: Marker) => HTMLElement;
+        // define a function to calculate the range based on zoom level
+        calcRange?: (zoom: number, zoomToRadius?: {[key: number]: number}) => number;
         // events
         onclick?: (AdvancedMarkerElement:any , marker: Marker) => void;
         onrendered?: (map: any) => void;
@@ -32,6 +34,7 @@
 
         reset = false,
         createMarker,
+        calcRange,
 
         onclick,
         onrendered,
@@ -58,20 +61,23 @@
         });
     };
 
-    const calculateRange = (zoom: number) => {
+    const calculateRange = (zoom: number, zoomToRadius?:{[key: number]: number}) => {
+        if(calcRange) {
+            return calcRange(zoom, zoomToRadius);
+        }
         // Define a function to convert zoom levels into search radius
-        const zoomToRadius:{[key: number]: number} = {
+        const ztr:{[key: number]: number} = zoomToRadius || {
             20: 0.4,    // 400 meters
             18: 1.5,    // 1.5 km
             16: 3.5,    // 3.5 km
             14: 11,     // 11 km
             12: 32.5,   // 32.5 km
             10: 97,     // 97 km
-            8: 291.5,   // 291.5 km
-            6: 535,     // 535 km
-            4: 800      // 800 km
+            8: 150,     // 150 km
+            6: 275,     // 275 km
+            4: 400      // 400 km
         };
-        return zoomToRadius[zoom] || 10; // Default to 10 km if undefined
+        return ztr[zoom] || 10; // Default to 10 km if undefined
     };
 
     const initMap = async () => {
