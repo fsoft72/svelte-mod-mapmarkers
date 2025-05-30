@@ -1,6 +1,8 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
 
+    import LocalizationStore from '$liwe3/stores/LocalizationStore.svelte';
+
     type PropsType = {
         coords?: { lat: number, lng: number };
         tracking?: boolean;
@@ -14,6 +16,8 @@
     };
 
     let { coords=$bindable(), tracking, options, onerror }:PropsType = $props();
+
+    const _ = LocalizationStore._;
     let watchId: number;
 
     const success = (position: GeolocationPosition) => {
@@ -35,8 +39,8 @@
 
     onMount( async () => {
         if( !navigator.geolocation ) {
-            console.warn('Geolocation is not supported by your browser');
-            onerror && onerror(1, 'Geolocation is not supported by your browser');
+            console.warn(_('Geolocation is not supported by your browser'));
+            onerror && onerror(1, _('Geolocation is not supported by your browser'));
             return;
         }
 
