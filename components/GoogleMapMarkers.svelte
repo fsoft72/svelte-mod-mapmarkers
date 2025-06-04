@@ -22,9 +22,9 @@
 <script lang="ts">
     import { PUBLIC_GOOGLE_MAPS_API_KEY } from '$env/static/public';
 	import { mkid } from '$liwe3/utils/utils';
+    import { goto } from '$app/navigation';
     import { onMount, onDestroy } from 'svelte';
 	import { marked } from 'marked';
-	import { runeDebug } from '$liwe3/utils/runes.svelte';
 
     let {
         markers,
@@ -126,9 +126,31 @@
         //ondrag && ondrag(center);
     };
 
+    const addTouchEvent = ( content:HTMLElement ) => {
+        // Add touch event workaround for all anchor tags
+        const anchors: HTMLAnchorElement[] = [...content.querySelectorAll('a')];
+        anchors.forEach(anchor => {
+            anchor.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+                // For tel/mailto, just let the browser handle it
+                if (anchor.target === '_blank' || anchor.href.startsWith('mailto:') || anchor.href.startsWith('tel:')) {
+                    window.open(anchor.href, anchor.target || '_self');
+                } else {
+                    console.log('Anchor clicked:', anchor.href);
+                    const url = new URL(anchor.href);
+                    if (!url.origin || url.origin === window.location.origin) {
+                        console.log('Navigating to internal link:', anchor.href);
+                        goto(anchor.href);
+                    }
+                    window.location.href = anchor.href;
+                }
+            });
+        });
+    };
+
     const createContent = (marker: Marker) => {
 
-        if (createMarker) return createMarker(marker);
+        if (createMarker) return _createMarker(marker);
 
         // most of theese fields are already filtered out in the backend
         const exclude = ['position', 'id', 'full_address', 'created', 'updated', 'domain'];
@@ -156,6 +178,16 @@
         `;
         content.innerHTML = innerContent;
 
+        addTouchEvent(content);
+
+        return content;
+    };
+
+    const _createMarker = (marker: Marker) => {
+        if(!createMarker) return;
+
+        const content = createMarker(marker);
+        addTouchEvent(content);
         return content;
     };
 
@@ -227,7 +259,6 @@
         init = await initMap();
 
        buildMarkers();
-       //buildInfowindows();
     });
 
     onDestroy(() => {
