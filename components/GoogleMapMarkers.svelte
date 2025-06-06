@@ -48,6 +48,7 @@
     let mapDiv: HTMLDivElement;
     let map: google.maps.Map | null = null;
     let evts: any = [];
+    let markerEvts: any = [];
     let AdvancedMarkerElement: any;
     let range = $derived.by(() => calculateRange(zoom)); // Derived state for range
 
@@ -126,25 +127,30 @@
         //ondrag && ondrag(center);
     };
 
-    const addTouchEvent = ( content:HTMLElement ) => {
-        // Add touch event workaround for all anchor tags
+    const addTouchAndClickEvents = (content: HTMLElement) => {
         const anchors: HTMLAnchorElement[] = [...content.querySelectorAll('a')];
         anchors.forEach(anchor => {
-            anchor.addEventListener('touchend', (e) => {
+            const handler = (e: Event) => {
                 e.stopPropagation();
                 // For tel/mailto, just let the browser handle it
-                if (anchor.target === '_blank' || anchor.href.startsWith('mailto:') || anchor.href.startsWith('tel:')) {
+                if (
+                    anchor.target === '_blank' ||
+                    anchor.href.startsWith('mailto:') ||
+                    anchor.href.startsWith('tel:')
+                ) {
                     window.open(anchor.href, anchor.target || '_self');
                 } else {
-                    console.log('Anchor clicked:', anchor.href);
-                    const url = new URL(anchor.href);
+                    const url = new URL(anchor.href, window.location.origin);
                     if (!url.origin || url.origin === window.location.origin) {
-                        console.log('Navigating to internal link:', anchor.href);
+                        e.preventDefault();
                         goto(anchor.href);
+                    } else {
+                        window.location.href = anchor.href;
                     }
-                    window.location.href = anchor.href;
                 }
-            });
+            };
+            markerEvts.push(anchor.addEventListener('touchend', handler));
+            markerEvts.push(anchor.addEventListener('click', handler));
         });
     };
 
@@ -178,7 +184,7 @@
         `;
         content.innerHTML = innerContent;
 
-        addTouchEvent(content);
+        addTouchAndClickEvents(content);
 
         return content;
     };
@@ -187,7 +193,7 @@
         if(!createMarker) return;
 
         const content = createMarker(marker);
-        addTouchEvent(content);
+        addTouchAndClickEvents(content);
         return content;
     };
 
@@ -219,7 +225,6 @@
             };
 
             //console.log('Creating marker at:', position);
-
             const advancedMarkerElement = new google.maps.marker.AdvancedMarkerElement({
                 map,
                 position,
@@ -264,6 +269,7 @@
     onDestroy(() => {
         //remove all markers event listener
         evts.map((evt:any) => evt.remove());
+        markerEvts.map((evt:any) => evt?.remove());
     });
 </script>
 <div bind:this={mapDiv} class="target-div"></div>
