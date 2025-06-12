@@ -141,11 +141,13 @@
             return true;
         } catch (error) {
             console.error('Error creating waypoints:', error);
+            /*
             addToast({
                 title: 'Waypoint Error',
                 message: _('Invalid coordinates detected in markers.'),
                 type: 'error'
             });
+            */
             return false;
         }
     };
